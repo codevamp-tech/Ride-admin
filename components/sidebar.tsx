@@ -3,6 +3,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { X } from "lucide-react"
+import { useEffect } from "react"
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
@@ -11,13 +13,22 @@ const navItems = [
   { label: "Drivers", href: "/drivers" },
 ]
 
-export function Sidebar() {
+export function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
 
   return (
-    <aside className="w-64 bg-primary text-white p-6 space-y-8">
-      <div className="mb-8 flex items-center justify-around">
-        <Image src="/logo.png" alt="Qubi Ride Logo" width={50} height={50} />
+    <aside className="w-64 bg-primary text-white p-6 space-y-8 relative h-screen overflow-y-auto">
+      <button
+        onClick={onClose}
+        className="absolute top-6 right-6 md:hidden p-1 hover:bg-primary-light rounded-lg transition"
+        aria-label="Close sidebar"
+        type="button"
+      >
+        <X className="w-6 h-6" />
+      </button>
+
+      <div className="mb-8 flex items-center gap-4">
+        <Image src="/logo.png" alt="Qubi Ride Logo" width={50} height={50} className="flex-shrink-0" />
         <span className="text-xl font-bold">Qubi Ride</span>
       </div>
       <nav className="space-y-2">
