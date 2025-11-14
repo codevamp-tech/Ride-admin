@@ -19,6 +19,7 @@ const driverSchema = new mongoose.Schema({
   ifscCode: { type: String, required: true },
   bankName: String,
   password: { type: String, required: true },
+  status: { type: String, enum: ["Active", "Inactive","Pending Approval", "Banned", "Rejected"], default: "Pending Approval" },
 });
 
 export default mongoose.models.Driver ||

@@ -5,6 +5,7 @@ const passengerSchema = new mongoose.Schema({
   email: String,
   phone: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  status: { type: String, enum: ["Active", "Banned"], default: "Active" },
 });
 
 export default mongoose.models.Passenger ||
