@@ -1,3 +1,4 @@
+"use client"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { CarTypesTable } from "@/components/car-types-table"
 import { useRouter } from "next/navigation"
