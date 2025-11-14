@@ -20,6 +20,6 @@ export async function POST(req) {
 
   return Response.json({
     success: true,
-    user: { email: admin.email },
+    user: { email: admin.email, role: admin.role },
   });
 }

@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error || "Login failed");
     }
 
-    const userData = { email: data.user.email };
+    const userData = { email: data.user.email, role: data.user.role };
 
     setIsAuthenticated(true);
     setUser(userData);

@@ -1,11 +1,14 @@
 "use client";
 
+import { useAuth } from "@/app/providers";
 import { Card } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 
 export function StatisticsCards({ bookings }) {
   const [drivers, setDrivers] = useState();
   const [passengers, setPassengers] = useState();
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role === "superAdmin"
 
   useEffect(() => {
     fetch("/api/drivers")
@@ -33,6 +36,7 @@ export function StatisticsCards({ bookings }) {
   let today = 0;
   let shared = 0;
   let privateCount = 0;
+  let airportCount = 0;
   let totalPayment = 0;
   let paymentThisMonth = 0;
 
@@ -56,11 +60,12 @@ export function StatisticsCards({ bookings }) {
     // Shared / Private
     if (b.rideType?.toLowerCase() === "shared") shared++;
     if (b.rideType?.toLowerCase() === "private") privateCount++;
+    if (b.rideType?.toLowerCase() === "airport") airportCount++;
 
     totalPayment += b.fare || 0; //
   });
 
-  const stats = [
+  let stats = [
     { label: "Total Bookings", value: bookings.length.toString(), icon: "📊" },
     { label: "Bookings This Month", value: thisMonth.toString(), icon: "📈" },
     { label: "Today's Bookings", value: today.toString(), icon: "📅" },
@@ -70,13 +75,32 @@ export function StatisticsCards({ bookings }) {
       value: privateCount.toString(),
       icon: "🚗",
     },
+    {
+      label: "Total Airport Bookings",
+      value: airportCount.toString(),
+      icon: "✈️",
+    },
 
     // Static values kept as requested
-    { label: "Total Payment Collected", value: `₹${totalPayment}`, icon: "💰" },
-    { label: "Payments This Month", value: `₹${paymentThisMonth}`, icon: "💳" },
+    {
+    label: "Total Payment Collected",
+    value: `₹${totalPayment}`,
+    icon: "💰",
+    permission: "superAdmin",
+  },
+  {
+    label: "Payments This Month",
+    value: `₹${paymentThisMonth}`,
+    icon: "💳",
+    permission: "superAdmin",
+  },
     { label: "Total Taxis", value: drivers?.length, icon: "🚕" },
     { label: "Total Passengers", value: passengers?.length, icon: "👤" },
   ];
+
+  if (!isSuperAdmin) {
+  stats = stats.filter((s) => s.permission !== "superAdmin");
+}
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

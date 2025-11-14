@@ -7,16 +7,16 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { PaymentsTable } from "@/components/payments-table"
 
 export default function PaymentsPage() {
-  const router = useRouter()
-  const { isAuthenticated } = useAuth()
+const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-    }
-  }, [isAuthenticated, router])
+    if (!isAuthenticated) router.push("/login");
+    // Only superAdmin allowed
+    if (user?.role !== "superAdmin") router.push("/dashboard");
+  }, [isAuthenticated, user, router]);
 
-  if (!isAuthenticated) return null
+  if (!isAuthenticated || user?.role !== "superAdmin") return null;
 
   return (
     <DashboardLayout>
