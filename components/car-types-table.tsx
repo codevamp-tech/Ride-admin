@@ -10,42 +10,19 @@ interface CarType {
   _id: string;
   type: string;
   rate: number;
+  rideType: "Private" | "Sharing" | "Airport";
   status: "Active" | "Inactive";
 }
 
-const mockCarTypes: CarType[] = [
-  {
-    _id: "CT001",
-    type: "Sedan",
-    rate: 12.5,
-    status: "Active",
-  },
-  {
-    _id: "CT002",
-    type: "SUV",
-    rate: 18.0,
-    status: "Active",
-  },
-  {
-    _id: "CT003",
-    type: "Hatchback",
-    rate: 10.0,
-    status: "Active",
-  },
-  {
-    _id: "CT004",
-    type: "Premium",
-    rate: 25.0,
-    status: "Inactive",
-  },
-];
-
 export function CarTypesTable() {
-  const [carTypes, setCarTypes] = useState<CarType[]>(mockCarTypes);
+  const [carTypes, setCarTypes] = useState<CarType[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "All" | "Active" | "Inactive"
   >("All");
+  const [rideTypeFilter, setRideTypeFilter] = useState<
+    "Private" | "Sharing" | "Airport"
+  >("Private");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCarType, setEditingCarType] = useState<CarType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,9 +54,11 @@ export function CarTypesTable() {
       const matchesStatus =
         statusFilter === "All" || carType.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      const matchesRideType = carType.rideType === rideTypeFilter;
+
+      return matchesSearch && matchesStatus && matchesRideType;
     });
-  }, [carTypes, searchTerm, statusFilter]);
+  }, [carTypes, searchTerm, statusFilter, rideTypeFilter]);
 
   const paginatedCarTypes = filteredCarTypes.slice(
     (currentPage - 1) * itemsPerPage,
@@ -91,6 +70,7 @@ export function CarTypesTable() {
     type: string;
     rate: number;
     status: "Active" | "Inactive";
+    rideType: "Private" | "Sharing" | "Airport";
   }) => {
     const res = await fetch("/api/cartypes", {
       method: "POST",
@@ -107,6 +87,7 @@ export function CarTypesTable() {
     type: string;
     rate: number;
     status: "Active" | "Inactive";
+    rideType: "Private" | "Sharing" | "Airport";
   }) => {
     if (!editingCarType) return;
 
@@ -130,6 +111,7 @@ export function CarTypesTable() {
 
     setCarTypes((prev) => prev.filter((ct) => ct._id !== _id));
   };
+
   const handleOpenModal = (carType?: CarType) => {
     if (carType) {
       setEditingCarType(carType);
@@ -186,7 +168,7 @@ export function CarTypesTable() {
             </select>
           </div>
 
-           <div className="flex items-end justify-end">
+          <div className="flex items-end justify-end">
             <button
               onClick={() => handleOpenModal()}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-900 hover:text-white hover:cursor-pointer bg-accent hover:bg-accent-light rounded-lg transition-colors"
@@ -195,6 +177,49 @@ export function CarTypesTable() {
               New Car Type
             </button>
           </div>
+        </div>
+
+        {/* Ride Type Tabs */}
+        <div className="flex gap-2 mb-6 border-b border-border">
+          <button
+            onClick={() => {
+              setRideTypeFilter("Private");
+              setCurrentPage(1);
+            }}
+            className={`px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer relative ${
+              rideTypeFilter === "Private"
+                ? "text-accent-light border-b-2 border-accent-light"
+                : "text-text-light hover:text-text"
+            }`}
+          >
+            Private Rides
+          </button>
+          <button
+            onClick={() => {
+              setRideTypeFilter("Sharing");
+              setCurrentPage(1);
+            }}
+            className={`px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer relative ${
+              rideTypeFilter === "Sharing"
+                ? "text-accent-light border-b-2 border-accent-light"
+                : "text-text-light hover:text-text"
+            }`}
+          >
+            Sharing Rides
+          </button>
+          <button
+            onClick={() => {
+              setRideTypeFilter("Airport");
+              setCurrentPage(1);
+            }}
+            className={`px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer relative ${
+              rideTypeFilter === "Airport"
+                ? "text-accent-light border-b-2 border-accent-light"
+                : "text-text-light hover:text-text"
+            }`}
+          >
+            Airport Rides
+          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -258,6 +283,12 @@ export function CarTypesTable() {
             </tbody>
           </table>
         </div>
+
+        {filteredCarTypes.length === 0 && (
+          <div className="text-center py-8 text-text-light">
+            No car types found for {rideTypeFilter} rides
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-6">
           <p className="text-text-light text-sm">
