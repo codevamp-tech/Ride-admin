@@ -7,31 +7,35 @@ import { Button } from "@/components/ui/button"
 interface CarTypeModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: { type: string; rate: number; status: "Active" | "Inactive" }) => void
-  initialData?: { type: string; rate: number; status: "Active" | "Inactive" } | null
+  onSubmit: (data: { type: string; rate: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport" }) => void
+  initialData?: { type: string; rate: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport" } | null
 }
 
 export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarTypeModalProps) {
   const [type, setType] = useState("")
   const [rate, setRate] = useState("")
   const [status, setStatus] = useState<"Active" | "Inactive">("Active")
-  const [errors, setErrors] = useState<{ type?: string; rate?: string }>({})
+  const [rideType, setRideType] = useState<"Private" | "Sharing" | "Airport">("Private")
+  const [errors, setErrors] = useState<{ type?: string; rate?: string; rideType?: string }>({})
 
   useEffect(() => {
     if (initialData) {
       setType(initialData.type)
       setRate(initialData.rate.toString())
       setStatus(initialData.status)
+      setRideType(initialData.rideType)
     } else {
       setType("")
       setRate("")
       setStatus("Active")
+      setRideType("Private")
+
     }
     setErrors({})
   }, [initialData, isOpen])
 
   const validateForm = () => {
-    const newErrors: { type?: string; rate?: string } = {}
+    const newErrors: { type?: string; rate?: string; rideType?: string; } = {}
 
     if (!type.trim()) {
       newErrors.type = "Car type is required"
@@ -39,6 +43,10 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
 
     if (!rate || parseFloat(rate) <= 0) {
       newErrors.rate = "Rate must be greater than 0"
+    }
+
+    if (!rideType.trim()) {
+      newErrors.rideType = "Ride type is required"
     }
 
     setErrors(newErrors)
@@ -53,10 +61,12 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
         type: type.trim(),
         rate: parseFloat(rate),
         status,
+        rideType,
       })
       setType("")
       setRate("")
       setStatus("Active")
+      setRideType("Private")
     }
   }
 
@@ -104,6 +114,19 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
               }`}
             />
             {errors.rate && <p className="text-danger text-xs mt-1">{errors.rate}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text mb-2">Ride Type</label>
+            <select
+              value={rideType}
+              onChange={(e) => setRideType(e.target.value as "Private" | "Sharing" | "Airport")}
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option>Private</option>
+              <option>Sharing</option>
+              <option>Airport</option>
+            </select>
           </div>
 
           <div>
