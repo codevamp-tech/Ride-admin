@@ -32,9 +32,10 @@ export function AdsTable() {
       try {
         const res = await fetch("/api/ads");
         const data = await res.json();
-        setAds(data);
+        setAds(Array.isArray(data) ? data : data.ads || []);
       } catch (err) {
         console.error("Failed to fetch ads", err);
+        setAds([]);
       } finally {
         setLoading(false);
       }
@@ -42,6 +43,7 @@ export function AdsTable() {
 
     fetchAds();
   }, []);
+
 
   const filteredAds = useMemo(() => {
     return ads.filter((ad) => {

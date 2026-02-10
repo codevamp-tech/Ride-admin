@@ -10,6 +10,8 @@ interface CarType {
   _id: string;
   type: string;
   rate: number;
+  baseFare: number;
+  airportCharge: number;
   rideType: "Private" | "Sharing" | "Airport";
   status: "Active" | "Inactive";
 }
@@ -34,9 +36,10 @@ export function CarTypesTable() {
       try {
         const res = await fetch("/api/cartypes");
         const data = await res.json();
-        setCarTypes(data);
+        setCarTypes(Array.isArray(data) ? data : data.carTypes || []);
       } catch (err) {
         console.error("Failed to fetch car types", err);
+        setCarTypes([]);
       } finally {
         setLoading(false);
       }
@@ -69,6 +72,8 @@ export function CarTypesTable() {
   const handleAddCarType = async (data: {
     type: string;
     rate: number;
+    baseFare: number;
+    airportCharge: number;
     status: "Active" | "Inactive";
     rideType: "Private" | "Sharing" | "Airport";
   }) => {
@@ -86,6 +91,8 @@ export function CarTypesTable() {
   const handleEditCarType = async (data: {
     type: string;
     rate: number;
+    baseFare: number;
+    airportCharge: number;
     status: "Active" | "Inactive";
     rideType: "Private" | "Sharing" | "Airport";
   }) => {
@@ -233,6 +240,14 @@ export function CarTypesTable() {
                   Rate (₹/km)
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-text">
+                  Base Fare (₹)
+                </th>
+                {rideTypeFilter === "Airport" && (
+                  <th className="px-4 py-3 text-left font-semibold text-text">
+                    Airport Charge (₹)
+                  </th>
+                )}
+                <th className="px-4 py-3 text-left font-semibold text-text">
                   Status
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-text">
@@ -249,6 +264,14 @@ export function CarTypesTable() {
                   <td className="px-4 py-3 text-text">
                     ₹{carType.rate.toFixed(2)}
                   </td>
+                  <td className="px-4 py-3 text-text">
+                    ₹{carType.baseFare ? carType.baseFare.toFixed(2) : "0.00"}
+                  </td>
+                  {rideTypeFilter === "Airport" && (
+                    <td className="px-4 py-3 text-text">
+                      ₹{carType.airportCharge ? carType.airportCharge.toFixed(2) : "0.00"}
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${

@@ -4,9 +4,9 @@ import { useAuth } from "@/app/providers";
 import { Card } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 
-export function StatisticsCards({ bookings }) {
-  const [drivers, setDrivers] = useState();
-  const [passengers, setPassengers] = useState();
+export function StatisticsCards({ bookings }: { bookings: any[] }) {
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [passengers, setPassengers] = useState<any[]>([]);
     const { user } = useAuth();
     const isSuperAdmin = user?.role === "superAdmin"
 
@@ -15,12 +15,20 @@ export function StatisticsCards({ bookings }) {
       .then((res) => res.json())
       .then((data) => {
         setDrivers(data.drivers || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching drivers:", error);
+        setDrivers([]);
       });
 
     fetch("/api/passengers")
       .then((res) => res.json())
       .then((data) => {
         setPassengers(data.passengers || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching passengers:", error);
+        setPassengers([]);
       });
   }, []);
 

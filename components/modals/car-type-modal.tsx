@@ -7,26 +7,32 @@ import { Button } from "@/components/ui/button"
 interface CarTypeModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: { type: string; rate: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport" }) => void
-  initialData?: { type: string; rate: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport" } | null
+  onSubmit: (data: { type: string; rate: number; baseFare: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport" }) => void
+  initialData?: { type: string; rate: number; baseFare: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport" } | null
 }
 
 export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarTypeModalProps) {
   const [type, setType] = useState("")
   const [rate, setRate] = useState("")
+  const [baseFare, setBaseFare] = useState("")
+  const [airportCharge, setAirportCharge] = useState("")
   const [status, setStatus] = useState<"Active" | "Inactive">("Active")
   const [rideType, setRideType] = useState<"Private" | "Sharing" | "Airport">("Private")
-  const [errors, setErrors] = useState<{ type?: string; rate?: string; rideType?: string }>({})
+  const [errors, setErrors] = useState<{ type?: string; rate?: string; baseFare?: string; airportCharge?: string; rideType?: string }>({})
 
   useEffect(() => {
     if (initialData) {
       setType(initialData.type)
       setRate(initialData.rate.toString())
+      setBaseFare(initialData.baseFare ? initialData.baseFare.toString() : "")
+      setAirportCharge(initialData.airportCharge ? initialData.airportCharge.toString() : "")
       setStatus(initialData.status)
       setRideType(initialData.rideType)
     } else {
       setType("")
       setRate("")
+      setBaseFare("")
+      setAirportCharge("")
       setStatus("Active")
       setRideType("Private")
 
@@ -35,7 +41,7 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
   }, [initialData, isOpen])
 
   const validateForm = () => {
-    const newErrors: { type?: string; rate?: string; rideType?: string; } = {}
+    const newErrors: { type?: string; rate?: string; baseFare?: string; airportCharge?: string; rideType?: string; } = {}
 
     if (!type.trim()) {
       newErrors.type = "Car type is required"
@@ -43,6 +49,14 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
 
     if (!rate || parseFloat(rate) <= 0) {
       newErrors.rate = "Rate must be greater than 0"
+    }
+
+    if (!baseFare || parseFloat(baseFare) < 0) {
+      newErrors.baseFare = "Base fare cannot be negative"
+    }
+
+    if (rideType === "Airport" && (!airportCharge || parseFloat(airportCharge) < 0)) {
+       newErrors.airportCharge = "Airport charge cannot be negative"
     }
 
     if (!rideType.trim()) {
@@ -60,11 +74,15 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
       onSubmit({
         type: type.trim(),
         rate: parseFloat(rate),
+        baseFare: parseFloat(baseFare) || 0,
+        airportCharge: rideType === "Airport" ? (parseFloat(airportCharge) || 0) : 0,
         status,
         rideType,
       })
       setType("")
       setRate("")
+      setBaseFare("")
+      setAirportCharge("")
       setStatus("Active")
       setRideType("Private")
     }
@@ -73,8 +91,8 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-xl font-semibold text-text">{initialData ? "Edit Car Type" : "Add New Car Type"}</h2>
           <button
@@ -93,7 +111,7 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
               type="text"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              placeholder="e.g., Sedan, SUV, Premium"
+              placeholder="e.g., Hatchback, Sedan, SUV"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent ${
                 errors.type ? "border-danger" : "border-border"
               }`}
@@ -117,6 +135,21 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
           </div>
 
           <div>
+            <label className="block text-sm font-medium text-text mb-2">Base Fare (₹)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={baseFare}
+              onChange={(e) => setBaseFare(e.target.value)}
+              placeholder="e.g., 500.00"
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent ${
+                errors.baseFare ? "border-danger" : "border-border"
+              }`}
+            />
+            {errors.baseFare && <p className="text-danger text-xs mt-1">{errors.baseFare}</p>}
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-text mb-2">Ride Type</label>
             <select
               value={rideType}
@@ -128,6 +161,23 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
               <option>Airport</option>
             </select>
           </div>
+
+          {rideType === "Airport" && (
+            <div>
+              <label className="block text-sm font-medium text-text mb-2">Airport Charge (₹)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={airportCharge}
+                onChange={(e) => setAirportCharge(e.target.value)}
+                placeholder="e.g., 100.00"
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent ${
+                  errors.airportCharge ? "border-danger" : "border-border"
+                }`}
+              />
+              {errors.airportCharge && <p className="text-danger text-xs mt-1">{errors.airportCharge}</p>}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-text mb-2">Status</label>

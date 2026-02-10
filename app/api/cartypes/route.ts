@@ -8,10 +8,8 @@ export async function GET() {
     const carTypes = await CarType.find().sort({ createdAt: -1 });
     return NextResponse.json(carTypes);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch car types" },
-      { status: 500 }
-    );
+    console.error("Error fetching car types:", error);
+    return NextResponse.json([], { status: 200 });
   }
 }
 

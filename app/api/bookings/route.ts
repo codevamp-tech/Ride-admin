@@ -4,12 +4,17 @@ import "@/models/passenger";
 import "@/models/driver";
 
 export async function GET() {
-  await connectDB();
+  try {
+    await connectDB();
 
-  const bookings = await RideBooking.find().sort({ createdAt: -1 });
+    const bookings = await RideBooking.find().sort({ createdAt: -1 });
     // .populate("userId")
     // .populate("driverId")
     
 
-  return Response.json({ bookings });
+    return Response.json({ bookings });
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    return Response.json({ bookings: [] }, { status: 200 });
+  }
 }
