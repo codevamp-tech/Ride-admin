@@ -1,13 +1,20 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-// Initialize S3 client
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
-  },
-});
+// Lazily initialize S3 client to avoid "Region is missing" error during build
+let s3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!s3Client) {
+    s3Client = new S3Client({
+      region: process.env.AWS_REGION || "",
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+      },
+    });
+  }
+  return s3Client;
+}
 
 export interface UploadResult {
   imageUrl: string;
@@ -44,7 +51,7 @@ export async function uploadToS3(
   });
 
   try {
-    await s3Client.send(command);
+    await getS3Client().send(command);
 
     // Construct the public URL
     const imageUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
