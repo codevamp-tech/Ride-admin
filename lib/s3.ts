@@ -6,10 +6,10 @@ let s3Client: S3Client | null = null;
 function getS3Client(): S3Client {
   if (!s3Client) {
     s3Client = new S3Client({
-      region: process.env.AWS_REGION || "",
+      region: process.env.REGION || "",
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+        accessKeyId: process.env.ACCESS_KEY_ID || "",
+        secretAccessKey: process.env.SECRET_ACCESS_KEY || "",
       },
     });
   }
@@ -33,10 +33,10 @@ export async function uploadToS3(
   fileName: string,
   contentType: string
 ): Promise<UploadResult> {
-  const bucketName = process.env.AWS_S3_BUCKET_NAME;
+  const bucketName = process.env.S3_BUCKET_NAME;
 
   if (!bucketName) {
-    throw new Error("AWS_S3_BUCKET_NAME is not configured");
+    throw new Error("S3_BUCKET_NAME is not configured");
   }
 
   // Generate unique key with timestamp
@@ -54,7 +54,7 @@ export async function uploadToS3(
     await getS3Client().send(command);
 
     // Construct the public URL
-    const imageUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    const imageUrl = `https://${bucketName}.s3.${process.env.REGION}.amazonaws.com/${key}`;
 
     return { imageUrl, key };
   } catch (error) {
@@ -68,10 +68,10 @@ export async function uploadToS3(
  */
 export function validateS3Config(): { isValid: boolean; error?: string } {
   const requiredVars = [
-    "AWS_REGION",
-    "AWS_ACCESS_KEY_ID",
-    "AWS_SECRET_ACCESS_KEY",
-    "AWS_S3_BUCKET_NAME",
+    "REGION",
+    "ACCESS_KEY_ID",
+    "SECRET_ACCESS_KEY",
+    "S3_BUCKET_NAME",
   ];
 
   for (const varName of requiredVars) {
