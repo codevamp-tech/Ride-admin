@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 const CarTypeSchema = new mongoose.Schema({
   type: { type: String, required: true},
   rate: { type: Number, required: true },
+  baseFare: { type: Number, required: true, default: 0 },
+  airportCharge: { type: Number, required: true, default: 0 },
   rideType: {
     type: String,
     enum: ["Private", "Sharing", "Airport"],

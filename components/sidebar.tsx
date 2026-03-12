@@ -19,6 +19,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     { label: "Drivers", href: "/drivers" },
     { label: "Passengers", href: "/passengers" },
     { label: "Configuration", href: "/configurations" },
+    { label: "Ads", href: "/ads" },
   ];
 
     const filteredNavItems = navItems.filter((item) => {

@@ -4,135 +4,131 @@ import { useState, useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit2, Trash2 } from "lucide-react";
-import { CarTypeModal } from "./modals/car-type-modal";
+import { AdModal } from "./modals/ad-modal";
 
-interface CarType {
+interface Ad {
   _id: string;
-  type: string;
-  rate: number;
-  baseFare: number;
-  airportCharge: number;
-  rideType: "Private" | "Sharing" | "Airport";
+  title: string;
+  description: string;
+  image: string;
+  link?: string;
   status: "Active" | "Inactive";
 }
 
-export function CarTypesTable() {
-  const [carTypes, setCarTypes] = useState<CarType[]>([]);
+export function AdsTable() {
+  const [ads, setAds] = useState<Ad[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "All" | "Active" | "Inactive"
   >("All");
-  const [rideTypeFilter, setRideTypeFilter] = useState<
-    "Private" | "Sharing" | "Airport"
-  >("Private");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCarType, setEditingCarType] = useState<CarType | null>(null);
+  const [editingAd, setEditingAd] = useState<Ad | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCarTypes = async () => {
+    const fetchAds = async () => {
       try {
-        const res = await fetch("/api/cartypes");
+        const res = await fetch("/api/ads");
         const data = await res.json();
-        setCarTypes(Array.isArray(data) ? data : data.carTypes || []);
+        setAds(Array.isArray(data) ? data : data.ads || []);
       } catch (err) {
-        console.error("Failed to fetch car types", err);
-        setCarTypes([]);
+        console.error("Failed to fetch ads", err);
+        setAds([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCarTypes();
+    fetchAds();
   }, []);
 
-  const filteredCarTypes = useMemo(() => {
-    return carTypes.filter((carType) => {
+
+  const filteredAds = useMemo(() => {
+    return ads.filter((ad) => {
       const matchesSearch =
-        carType.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        carType._id.toLowerCase().includes(searchTerm.toLowerCase());
+        ad.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ad.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ad._id.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesStatus =
-        statusFilter === "All" || carType.status === statusFilter;
+        statusFilter === "All" || ad.status === statusFilter;
 
-      const matchesRideType = carType.rideType === rideTypeFilter;
-
-      return matchesSearch && matchesStatus && matchesRideType;
+      return matchesSearch && matchesStatus;
     });
-  }, [carTypes, searchTerm, statusFilter, rideTypeFilter]);
+  }, [ads, searchTerm, statusFilter]);
 
-  const paginatedCarTypes = filteredCarTypes.slice(
+  const paginatedAds = filteredAds.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(filteredCarTypes.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAds.length / itemsPerPage);
 
-  const handleAddCarType = async (data: {
-    type: string;
-    rate: number;
-    baseFare: number;
-    airportCharge: number;
+  const handleAddAd = async (data: {
+    title: string;
+    description: string;
+    image: string;
+    link?: string;
     status: "Active" | "Inactive";
-    rideType: "Private" | "Sharing" | "Airport";
   }) => {
-    const res = await fetch("/api/cartypes", {
+    const res = await fetch("/api/ads", {
       method: "POST",
       body: JSON.stringify(data),
     });
 
-    const newType = await res.json();
-    setCarTypes((prev) => [...prev, newType]);
+    const newAd = await res.json();
+    setAds((prev) => [newAd, ...prev]);
 
     setIsModalOpen(false);
   };
 
-  const handleEditCarType = async (data: {
-    type: string;
-    rate: number;
-    baseFare: number;
-    airportCharge: number;
+  const handleEditAd = async (data: {
+    title: string;
+    description: string;
+    image: string;
+    link?: string;
     status: "Active" | "Inactive";
-    rideType: "Private" | "Sharing" | "Airport";
   }) => {
-    if (!editingCarType) return;
+    if (!editingAd) return;
 
-    const res = await fetch(`/api/cartypes/${editingCarType._id}`, {
+    const res = await fetch(`/api/ads/${editingAd._id}`, {
       method: "PATCH",
       body: JSON.stringify(data),
     });
 
     const updated = await res.json();
 
-    setCarTypes((prev) =>
-      prev.map((ct) => (ct._id === editingCarType._id ? updated : ct))
+    setAds((prev) =>
+      prev.map((ad) => (ad._id === editingAd._id ? updated : ad))
     );
 
-    setEditingCarType(null);
+    setEditingAd(null);
     setIsModalOpen(false);
   };
 
-  const handleDeleteCarType = async (_id: string) => {
-    await fetch(`/api/cartypes/${_id}`, { method: "DELETE" });
+  const handleDeleteAd = async (_id: string) => {
+    if (!confirm("Are you sure you want to delete this ad?")) return;
 
-    setCarTypes((prev) => prev.filter((ct) => ct._id !== _id));
+    await fetch(`/api/ads/${_id}`, { method: "DELETE" });
+
+    setAds((prev) => prev.filter((ad) => ad._id !== _id));
   };
 
-  const handleOpenModal = (carType?: CarType) => {
-    if (carType) {
-      setEditingCarType(carType);
+  const handleOpenModal = (ad?: Ad) => {
+    if (ad) {
+      setEditingAd(ad);
     }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setEditingCarType(null);
+    setEditingAd(null);
   };
 
   if (loading) {
-    return <p className="text-center py-10">Loading car types...</p>;
+    return <p className="text-center py-10">Loading ads...</p>;
   }
 
   return (
@@ -145,7 +141,7 @@ export function CarTypesTable() {
             </label>
             <input
               type="text"
-              placeholder="Car type or ID"
+              placeholder="Title, description or ID"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -181,52 +177,9 @@ export function CarTypesTable() {
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-900 hover:text-white hover:cursor-pointer bg-accent hover:bg-accent-light rounded-lg transition-colors"
             >
               <Plus className="w-4 h-4" />
-              New Car Type
+              New Ad
             </button>
           </div>
-        </div>
-
-        {/* Ride Type Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-border">
-          <button
-            onClick={() => {
-              setRideTypeFilter("Private");
-              setCurrentPage(1);
-            }}
-            className={`px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer relative ${
-              rideTypeFilter === "Private"
-                ? "text-accent-light border-b-2 border-accent-light"
-                : "text-text-light hover:text-text"
-            }`}
-          >
-            Private Rides
-          </button>
-          <button
-            onClick={() => {
-              setRideTypeFilter("Sharing");
-              setCurrentPage(1);
-            }}
-            className={`px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer relative ${
-              rideTypeFilter === "Sharing"
-                ? "text-accent-light border-b-2 border-accent-light"
-                : "text-text-light hover:text-text"
-            }`}
-          >
-            Sharing Rides
-          </button>
-          <button
-            onClick={() => {
-              setRideTypeFilter("Airport");
-              setCurrentPage(1);
-            }}
-            className={`px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer relative ${
-              rideTypeFilter === "Airport"
-                ? "text-accent-light border-b-2 border-accent-light"
-                : "text-text-light hover:text-text"
-            }`}
-          >
-            Airport Rides
-          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -234,19 +187,17 @@ export function CarTypesTable() {
             <thead className="bg-surface border-b border-border">
               <tr>
                 <th className="px-4 py-3 text-left font-semibold text-text">
-                  Type
+                  Title
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-text">
-                  Rate (₹/km)
+                  Description
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-text">
-                  Base Fare (₹)
+                  Image
                 </th>
-                {rideTypeFilter === "Airport" && (
-                  <th className="px-4 py-3 text-left font-semibold text-text">
-                    Airport Charge (₹)
-                  </th>
-                )}
+                <th className="px-4 py-3 text-left font-semibold text-text">
+                  Link
+                </th>
                 <th className="px-4 py-3 text-left font-semibold text-text">
                   Status
                 </th>
@@ -256,45 +207,60 @@ export function CarTypesTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {paginatedCarTypes.map((carType) => (
-                <tr key={carType._id} className="hover:bg-surface">
+              {paginatedAds.map((ad) => (
+                <tr key={ad._id} className="hover:bg-surface">
                   <td className="px-4 py-3 text-text font-medium">
-                    {carType.type}
+                    {ad.title}
+                  </td>
+                  <td className="px-4 py-3 text-text max-w-xs truncate">
+                    {ad.description}
                   </td>
                   <td className="px-4 py-3 text-text">
-                    ₹{carType.rate.toFixed(2)}
+                    <img
+                      src={ad.image}
+                      alt={ad.title}
+                      className="w-12 h-12 object-cover rounded cursor-pointer"
+                      onClick={() => window.open(ad.image, '_blank')}
+                      title="Click to view full size"
+                    />
                   </td>
                   <td className="px-4 py-3 text-text">
-                    ₹{carType.baseFare ? carType.baseFare.toFixed(2) : "0.00"}
+                    {ad.link ? (
+                      <a
+                        href={ad.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline text-xs"
+                      >
+                        Visit
+                      </a>
+                    ) : (
+                      <span className="text-gray-400 text-xs">-</span>
+                    )}
                   </td>
-                  {rideTypeFilter === "Airport" && (
-                    <td className="px-4 py-3 text-text">
-                      ₹{carType.airportCharge ? carType.airportCharge.toFixed(2) : "0.00"}
-                    </td>
-                  )}
                   <td className="px-4 py-3">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        carType.status === "Active"
+                        ad.status === "Active"
                           ? "bg-success/10 text-success"
                           : "bg-warning/10 text-warning"
                       }`}
                     >
-                      {carType.status}
+                      {ad.status}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
-                          handleOpenModal(carType);
+                          handleOpenModal(ad);
                         }}
                         className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteCarType(carType._id)}
+                        onClick={() => handleDeleteAd(ad._id)}
                         className="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
                       >
                         Delete
@@ -307,20 +273,20 @@ export function CarTypesTable() {
           </table>
         </div>
 
-        {filteredCarTypes.length === 0 && (
+        {filteredAds.length === 0 && (
           <div className="text-center py-8 text-text-light">
-            No car types found for {rideTypeFilter} rides
+            No ads found
           </div>
         )}
 
         <div className="flex items-center justify-between mt-6">
           <p className="text-text-light text-sm">
             Showing{" "}
-            {paginatedCarTypes.length > 0
+            {paginatedAds.length > 0
               ? (currentPage - 1) * itemsPerPage + 1
               : 0}{" "}
-            to {Math.min(currentPage * itemsPerPage, filteredCarTypes.length)}{" "}
-            of {filteredCarTypes.length} car types
+            to {Math.min(currentPage * itemsPerPage, filteredAds.length)}{" "}
+            of {filteredAds.length} ads
           </p>
           <div className="flex gap-2">
             <button
@@ -331,13 +297,13 @@ export function CarTypesTable() {
               Previous
             </button>
             <span className="px-3 py-1 text-text">
-              Page {currentPage} of {totalPages}
+              Page {currentPage} of {totalPages || 1}
             </span>
             <button
               onClick={() =>
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || totalPages === 0}
               className="px-3 py-1 border border-border rounded-lg text-text hover:bg-surface disabled:opacity-50"
             >
               Next
@@ -346,11 +312,11 @@ export function CarTypesTable() {
         </div>
       </Card>
 
-      <CarTypeModal
+      <AdModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onSubmit={editingCarType ? handleEditCarType : handleAddCarType}
-        initialData={editingCarType}
+        onSubmit={editingAd ? handleEditAd : handleAddAd}
+        initialData={editingAd}
       />
     </div>
   );

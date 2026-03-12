@@ -10,7 +10,7 @@ import {
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: { email: string } | null;
+  user: { email: string; role?: string } | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ email: string } | null>(null);
+  const [user, setUser] = useState<{ email: string; role?: string } | null>(null);
 
   useEffect(() => {
     const savedAuth = localStorage.getItem("qubi_auth");
