@@ -41,14 +41,17 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         <X className="w-6 h-6" />
       </button>
 
-      <div className="mb-8 flex items-center gap-4">
-        <Image
-          src="/logo.png"
-          alt="Qubi Ride Logo"
-          width={50}
-          height={50}
-          className="flex-shrink-0"
-        />
+      <div className="mb-8 flex flex-col items-center justify-center text-center">
+        <div className="relative inline-block">
+          <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full"></div>
+          <Image
+            src="/logo.png"
+            alt="Qubi Ride Logo"
+            width={80}
+            height={80}
+            className="mx-auto mb-5 rounded-2xl border-3 border-gray-500 dark:border-slate-700 shadow-md relative z-10"
+          />
+        </div>
         <span className="text-xl font-bold">Qubi Ride</span>
       </div>
       <nav className="space-y-2">
