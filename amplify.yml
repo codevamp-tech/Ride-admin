@@ -7,6 +7,11 @@ frontend:
         - pnpm install --no-frozen-lockfile
     build:
       commands:
+        - echo "DB_URL=$DB_URL" >> .env.production
+        - echo "AWS_REGION=$REGION" >> .env.production
+        - echo "AWS_ACCESS_KEY_ID=$ACCESS_KEY_ID" >> .env.production
+        - echo "AWS_SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY" >> .env.production
+        - echo "AWS_S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env.production
         - pnpm run build
   artifacts:
     baseDirectory: .next

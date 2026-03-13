@@ -23,7 +23,7 @@ export default function LoginPage() {
     try {
       await login(email, password)
     } catch (err) {
-      setError("Invalid credentials. Please try again.")
+      setError(err instanceof Error ? err.message : "Invalid credentials. Please try again.")
     } finally {
       setIsLoading(false)
     }
