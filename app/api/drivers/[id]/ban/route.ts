@@ -8,8 +8,11 @@ export async function PATCH(req, context) {
   const driver = await Driver.findById(id);
   const newStatus = driver.status === "Banned" ? "Active" : "Banned";
 
-  driver.status = newStatus;
-  await driver.save();
+  await Driver.findByIdAndUpdate(
+    id, 
+    { status: newStatus }, 
+    { new: true }
+  );
 
   return Response.json({ success: true, status: newStatus });
 }
