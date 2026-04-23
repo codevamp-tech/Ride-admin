@@ -15,10 +15,10 @@ const driverSchema = new mongoose.Schema({
   licensePlate: String,
   vehicleType: { type: String, required: true },
   accountHolderName: String,
-  accountNumber: { type: String, required: true },
-  ifscCode: { type: String, required: true },
+  accountNumber: { type: String },
+  ifscCode: { type: String },
   bankName: String,
-  password: { type: String, required: true },
+  password: { type: String },
   status: { type: String, enum: ["Active", "Inactive","Pending Approval", "Banned", "Rejected"], default: "Pending Approval" },
 });
 
