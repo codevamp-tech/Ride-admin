@@ -14,6 +14,11 @@ interface CarType {
   airportCharge: number;
   rideType: "Private" | "Sharing" | "Airport";
   status: "Active" | "Inactive";
+  peakHourStart?: string;
+  peakHourEnd?: string;
+  peakHourSurge?: number;
+  peakDays?: string[];
+  peakDaySurge?: number;
 }
 
 export function CarTypesTable() {
@@ -76,6 +81,11 @@ export function CarTypesTable() {
     airportCharge: number;
     status: "Active" | "Inactive";
     rideType: "Private" | "Sharing" | "Airport";
+    peakHourStart?: string;
+    peakHourEnd?: string;
+    peakHourSurge?: number;
+    peakDays?: string[];
+    peakDaySurge?: number;
   }) => {
     const res = await fetch("/api/cartypes", {
       method: "POST",
@@ -95,6 +105,11 @@ export function CarTypesTable() {
     airportCharge: number;
     status: "Active" | "Inactive";
     rideType: "Private" | "Sharing" | "Airport";
+    peakHourStart?: string;
+    peakHourEnd?: string;
+    peakHourSurge?: number;
+    peakDays?: string[];
+    peakDaySurge?: number;
   }) => {
     if (!editingCarType) return;
 

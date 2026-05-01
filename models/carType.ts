@@ -16,6 +16,11 @@ const CarTypeSchema = new mongoose.Schema({
     default: "Active",
     required: true,
   },
+  peakHourStart: { type: String, required: false },
+  peakHourEnd: { type: String, required: false },
+  peakHourSurge: { type: Number, required: false },
+  peakDays: { type: [String], required: false },
+  peakDaySurge: { type: Number, required: false },
 }, { timestamps: true });
 
 export default mongoose.models.CarType ||

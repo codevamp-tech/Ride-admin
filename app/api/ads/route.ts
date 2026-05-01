@@ -6,7 +6,26 @@ export async function GET() {
   try {
     await connectDB();
     const ads = await Ad.find().sort({ createdAt: -1 });
-    return NextResponse.json(ads);
+
+    const now = new Date();
+    let updated = false;
+
+    // Check expiration and update if needed
+    for (const ad of ads) {
+      if (ad.status === 'Active' && ad.duration) {
+        const expirationDate = new Date(ad.createdAt);
+        expirationDate.setDate(expirationDate.getDate() + ad.duration);
+        if (now > expirationDate) {
+          ad.status = 'Inactive';
+          await ad.save();
+          updated = true;
+        }
+      }
+    }
+
+    const finalAds = updated ? await Ad.find().sort({ createdAt: -1 }) : ads;
+
+    return NextResponse.json(finalAds);
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch ads" },
