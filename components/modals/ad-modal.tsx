@@ -9,8 +9,8 @@ const CROP_OUTPUT_SIZE = 400 // Output canvas size in px
 interface AdModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: { title: string; description: string; image: string; link?: string; status: "Active" | "Inactive" }) => void
-  initialData?: { title: string; description: string; image: string; link?: string; status: "Active" | "Inactive" } | null
+  onSubmit: (data: { title: string; description: string; image: string; link?: string; status: "Active" | "Inactive"; duration?: number }) => void
+  initialData?: { title: string; description: string; image: string; link?: string; status: "Active" | "Inactive"; duration?: number } | null
 }
 
 function CropTool({ src, onCropped, onCancel }: { src: string; onCropped: (file: File, preview: string) => void; onCancel: () => void }) {
@@ -196,7 +196,8 @@ export function AdModal({ isOpen, onClose, onSubmit, initialData }: AdModalProps
   const [showCropper, setShowCropper] = useState(false)
   const [link, setLink] = useState("")
   const [status, setStatus] = useState<"Active" | "Inactive">("Active")
-  const [errors, setErrors] = useState<{ title?: string; description?: string; image?: string }>({})
+  const [duration, setDuration] = useState<string>("")
+  const [errors, setErrors] = useState<{ title?: string; description?: string; image?: string; duration?: string }>({})
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
@@ -207,6 +208,7 @@ export function AdModal({ isOpen, onClose, onSubmit, initialData }: AdModalProps
       setImagePreview(initialData.image)
       setLink(initialData.link || "")
       setStatus(initialData.status)
+      setDuration(initialData.duration?.toString() || "")
     } else {
       setTitle("")
       setDescription("")
@@ -215,6 +217,7 @@ export function AdModal({ isOpen, onClose, onSubmit, initialData }: AdModalProps
       setImagePreview("")
       setLink("")
       setStatus("Active")
+      setDuration("")
     }
     setRawImageSrc("")
     setShowCropper(false)
@@ -290,10 +293,11 @@ export function AdModal({ isOpen, onClose, onSubmit, initialData }: AdModalProps
   }
 
   const validateForm = () => {
-    const newErrors: { title?: string; description?: string; image?: string } = {}
+    const newErrors: { title?: string; description?: string; image?: string; duration?: string } = {}
     if (!title.trim()) newErrors.title = "Title is required"
     if (!description.trim()) newErrors.description = "Description is required"
     if (!image && !imageFile) newErrors.image = "Image is required"
+    if (duration && (isNaN(Number(duration)) || Number(duration) <= 0)) newErrors.duration = "Duration must be a positive number"
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -315,10 +319,11 @@ export function AdModal({ isOpen, onClose, onSubmit, initialData }: AdModalProps
       image: imageUrl,
       link: link.trim() || undefined,
       status,
+      duration: duration ? Number(duration) : undefined,
     })
 
     setTitle(""); setDescription(""); setImage(""); setImageFile(null)
-    setImagePreview(""); setLink(""); setStatus("Active")
+    setImagePreview(""); setLink(""); setStatus("Active"); setDuration("")
   }
 
   if (!isOpen) return null
@@ -429,6 +434,21 @@ export function AdModal({ isOpen, onClose, onSubmit, initialData }: AdModalProps
               <option>Active</option>
               <option>Inactive</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text mb-2">
+              Duration <span className="text-gray-400">(Optional, in days)</span>
+            </label>
+            <input
+              type="number"
+              min="1"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="e.g., 7"
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent ${errors.duration ? "border-danger" : "border-border"}`}
+            />
+            {errors.duration && <p className="text-danger text-xs mt-1">{errors.duration}</p>}
           </div>
 
           {!showCropper && (
