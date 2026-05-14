@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 interface CarTypeModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: { type: string; rate: number; baseFare: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport" }) => void
-  initialData?: { type: string; rate: number; baseFare: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport" } | null
+  onSubmit: (data: { type: string; rate: number; baseFare: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport"; peakHourStart?: string; peakHourEnd?: string; peakHourSurge?: number; peakDays?: string[]; peakDaySurge?: number; }) => void
+  initialData?: { type: string; rate: number; baseFare: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport"; peakHourStart?: string; peakHourEnd?: string; peakHourSurge?: number; peakDays?: string[]; peakDaySurge?: number; } | null
 }
 
 export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarTypeModalProps) {
@@ -18,6 +18,11 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
   const [airportCharge, setAirportCharge] = useState("")
   const [status, setStatus] = useState<"Active" | "Inactive">("Active")
   const [rideType, setRideType] = useState<"Private" | "Sharing" | "Airport">("Private")
+  const [peakHourStart, setPeakHourStart] = useState("")
+  const [peakHourEnd, setPeakHourEnd] = useState("")
+  const [peakHourSurge, setPeakHourSurge] = useState("")
+  const [peakDays, setPeakDays] = useState("")
+  const [peakDaySurge, setPeakDaySurge] = useState("")
   const [errors, setErrors] = useState<{ type?: string; rate?: string; baseFare?: string; airportCharge?: string; rideType?: string }>({})
 
   useEffect(() => {
@@ -28,6 +33,11 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
       setAirportCharge(initialData.airportCharge ? initialData.airportCharge.toString() : "")
       setStatus(initialData.status)
       setRideType(initialData.rideType)
+      setPeakHourStart(initialData.peakHourStart || "")
+      setPeakHourEnd(initialData.peakHourEnd || "")
+      setPeakHourSurge(initialData.peakHourSurge ? initialData.peakHourSurge.toString() : "")
+      setPeakDays(initialData.peakDays ? initialData.peakDays.join(", ") : "")
+      setPeakDaySurge(initialData.peakDaySurge ? initialData.peakDaySurge.toString() : "")
     } else {
       setType("")
       setRate("")
@@ -35,7 +45,11 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
       setAirportCharge("")
       setStatus("Active")
       setRideType("Private")
-
+      setPeakHourStart("")
+      setPeakHourEnd("")
+      setPeakHourSurge("")
+      setPeakDays("")
+      setPeakDaySurge("")
     }
     setErrors({})
   }, [initialData, isOpen])
@@ -78,6 +92,11 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
         airportCharge: rideType === "Airport" ? (parseFloat(airportCharge) || 0) : 0,
         status,
         rideType,
+        peakHourStart: peakHourStart.trim() || undefined,
+        peakHourEnd: peakHourEnd.trim() || undefined,
+        peakHourSurge: peakHourSurge ? parseFloat(peakHourSurge) : undefined,
+        peakDays: peakDays ? peakDays.split(",").map(d => d.trim()).filter(d => d) : undefined,
+        peakDaySurge: peakDaySurge ? parseFloat(peakDaySurge) : undefined,
       })
       setType("")
       setRate("")
@@ -85,6 +104,11 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
       setAirportCharge("")
       setStatus("Active")
       setRideType("Private")
+      setPeakHourStart("")
+      setPeakHourEnd("")
+      setPeakHourSurge("")
+      setPeakDays("")
+      setPeakDaySurge("")
     }
   }
 
@@ -189,6 +213,66 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
               <option>Active</option>
               <option>Inactive</option>
             </select>
+          </div>
+
+          <div className="border-t border-border pt-4 mt-4">
+            <h3 className="text-md font-medium text-text mb-3">Peak Hour Surge</h3>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-text mb-2">Start Time</label>
+                <input
+                  type="time"
+                  value={peakHourStart}
+                  onChange={(e) => setPeakHourStart(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border-border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text mb-2">End Time</label>
+                <input
+                  type="time"
+                  value={peakHourEnd}
+                  onChange={(e) => setPeakHourEnd(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border-border"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text mb-2">Surge Rate (Multiplier, e.g. 1.5)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={peakHourSurge}
+                onChange={(e) => setPeakHourSurge(e.target.value)}
+                placeholder="e.g., 1.5"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border-border"
+              />
+            </div>
+          </div>
+
+          <div className="border-t border-border pt-4 mt-4">
+            <h3 className="text-md font-medium text-text mb-3">Peak Day Surge</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-text mb-2">Days (comma separated)</label>
+              <input
+                type="text"
+                value={peakDays}
+                onChange={(e) => setPeakDays(e.target.value)}
+                placeholder="e.g., Saturday, Sunday"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border-border"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text mb-2">Surge Rate (Multiplier, e.g. 1.5)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={peakDaySurge}
+                onChange={(e) => setPeakDaySurge(e.target.value)}
+                placeholder="e.g., 1.5"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border-border"
+              />
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">

@@ -13,6 +13,7 @@ interface Ad {
   image: string;
   link?: string;
   status: "Active" | "Inactive";
+  duration?: number;
 }
 
 export function AdsTable() {
@@ -71,6 +72,7 @@ export function AdsTable() {
     image: string;
     link?: string;
     status: "Active" | "Inactive";
+    duration?: number;
   }) => {
     const res = await fetch("/api/ads", {
       method: "POST",
@@ -89,6 +91,7 @@ export function AdsTable() {
     image: string;
     link?: string;
     status: "Active" | "Inactive";
+    duration?: number;
   }) => {
     if (!editingAd) return;
 

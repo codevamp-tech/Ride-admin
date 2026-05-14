@@ -11,6 +11,7 @@ const AdSchema = new mongoose.Schema({
     default: "Active",
     required: true,
   },
+  duration: { type: Number, required: false },
 }, { timestamps: true });
 
 export default mongoose.models.Ad ||
