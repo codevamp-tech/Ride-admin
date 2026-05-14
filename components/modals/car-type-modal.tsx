@@ -7,14 +7,15 @@ import { Button } from "@/components/ui/button"
 interface CarTypeModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: { type: string; rate: number; baseFare: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport"; peakHourStart?: string; peakHourEnd?: string; peakHourSurge?: number; peakDays?: string[]; peakDaySurge?: number; }) => void
-  initialData?: { type: string; rate: number; baseFare: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport"; peakHourStart?: string; peakHourEnd?: string; peakHourSurge?: number; peakDays?: string[]; peakDaySurge?: number; } | null
+  onSubmit: (data: { type: string; rate: number; baseFare: number; deviationCharge: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport"; peakHourStart?: string; peakHourEnd?: string; peakHourSurge?: number; peakDays?: string[]; peakDaySurge?: number; }) => void
+  initialData?: { type: string; rate: number; baseFare: number; deviationCharge: number; airportCharge: number; status: "Active" | "Inactive"; rideType: "Private" | "Sharing" | "Airport"; peakHourStart?: string; peakHourEnd?: string; peakHourSurge?: number; peakDays?: string[]; peakDaySurge?: number; } | null
 }
 
 export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarTypeModalProps) {
   const [type, setType] = useState("")
   const [rate, setRate] = useState("")
   const [baseFare, setBaseFare] = useState("")
+  const [deviationCharge, setDeviationCharge] = useState("")
   const [airportCharge, setAirportCharge] = useState("")
   const [status, setStatus] = useState<"Active" | "Inactive">("Active")
   const [rideType, setRideType] = useState<"Private" | "Sharing" | "Airport">("Private")
@@ -23,13 +24,14 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
   const [peakHourSurge, setPeakHourSurge] = useState("")
   const [peakDays, setPeakDays] = useState("")
   const [peakDaySurge, setPeakDaySurge] = useState("")
-  const [errors, setErrors] = useState<{ type?: string; rate?: string; baseFare?: string; airportCharge?: string; rideType?: string }>({})
+  const [errors, setErrors] = useState<{ type?: string; rate?: string; baseFare?: string; deviationCharge?: string; airportCharge?: string; rideType?: string }>({})
 
   useEffect(() => {
     if (initialData) {
       setType(initialData.type)
       setRate(initialData.rate.toString())
       setBaseFare(initialData.baseFare ? initialData.baseFare.toString() : "")
+      setDeviationCharge(initialData.deviationCharge ? initialData.deviationCharge.toString() : "")
       setAirportCharge(initialData.airportCharge ? initialData.airportCharge.toString() : "")
       setStatus(initialData.status)
       setRideType(initialData.rideType)
@@ -42,6 +44,7 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
       setType("")
       setRate("")
       setBaseFare("")
+      setDeviationCharge("")
       setAirportCharge("")
       setStatus("Active")
       setRideType("Private")
@@ -55,7 +58,7 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
   }, [initialData, isOpen])
 
   const validateForm = () => {
-    const newErrors: { type?: string; rate?: string; baseFare?: string; airportCharge?: string; rideType?: string; } = {}
+    const newErrors: { type?: string; rate?: string; baseFare?: string; deviationCharge?: string; airportCharge?: string; rideType?: string; } = {}
 
     if (!type.trim()) {
       newErrors.type = "Car type is required"
@@ -67,6 +70,10 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
 
     if (!baseFare || parseFloat(baseFare) < 0) {
       newErrors.baseFare = "Base fare cannot be negative"
+    }
+    
+    if (deviationCharge && parseFloat(deviationCharge) < 0) {
+      newErrors.deviationCharge = "Deviation charge cannot be negative"
     }
 
     if (rideType === "Airport" && (!airportCharge || parseFloat(airportCharge) < 0)) {
@@ -89,6 +96,7 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
         type: type.trim(),
         rate: parseFloat(rate),
         baseFare: parseFloat(baseFare) || 0,
+        deviationCharge: parseFloat(deviationCharge) || 0,
         airportCharge: rideType === "Airport" ? (parseFloat(airportCharge) || 0) : 0,
         status,
         rideType,
@@ -101,6 +109,7 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
       setType("")
       setRate("")
       setBaseFare("")
+      setDeviationCharge("")
       setAirportCharge("")
       setStatus("Active")
       setRideType("Private")
@@ -171,6 +180,21 @@ export function CarTypeModal({ isOpen, onClose, onSubmit, initialData }: CarType
               }`}
             />
             {errors.baseFare && <p className="text-danger text-xs mt-1">{errors.baseFare}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text mb-2">Deviation Charge (₹)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={deviationCharge}
+              onChange={(e) => setDeviationCharge(e.target.value)}
+              placeholder="e.g., 20.00"
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent ${
+                errors.deviationCharge ? "border-danger" : "border-border"
+              }`}
+            />
+            {errors.deviationCharge && <p className="text-danger text-xs mt-1">{errors.deviationCharge}</p>}
           </div>
 
           <div>

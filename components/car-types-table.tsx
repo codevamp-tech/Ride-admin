@@ -11,6 +11,7 @@ interface CarType {
   type: string;
   rate: number;
   baseFare: number;
+  deviationCharge: number;
   airportCharge: number;
   rideType: "Private" | "Sharing" | "Airport";
   status: "Active" | "Inactive";
@@ -78,6 +79,7 @@ export function CarTypesTable() {
     type: string;
     rate: number;
     baseFare: number;
+    deviationCharge: number;
     airportCharge: number;
     status: "Active" | "Inactive";
     rideType: "Private" | "Sharing" | "Airport";
@@ -102,6 +104,7 @@ export function CarTypesTable() {
     type: string;
     rate: number;
     baseFare: number;
+    deviationCharge: number;
     airportCharge: number;
     status: "Active" | "Inactive";
     rideType: "Private" | "Sharing" | "Airport";
@@ -257,6 +260,9 @@ export function CarTypesTable() {
                 <th className="px-4 py-3 text-left font-semibold text-text">
                   Base Fare (₹)
                 </th>
+                <th className="px-4 py-3 text-left font-semibold text-text">
+                  Deviation Charge (₹)
+                </th>
                 {rideTypeFilter === "Airport" && (
                   <th className="px-4 py-3 text-left font-semibold text-text">
                     Airport Charge (₹)
@@ -281,6 +287,9 @@ export function CarTypesTable() {
                   </td>
                   <td className="px-4 py-3 text-text">
                     ₹{carType.baseFare ? carType.baseFare.toFixed(2) : "0.00"}
+                  </td>
+                  <td className="px-4 py-3 text-text">
+                    ₹{carType.deviationCharge ? carType.deviationCharge.toFixed(2) : "0.00"}
                   </td>
                   {rideTypeFilter === "Airport" && (
                     <td className="px-4 py-3 text-text">
