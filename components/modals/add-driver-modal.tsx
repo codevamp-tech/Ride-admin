@@ -22,9 +22,43 @@ export function AddDriverModal({ open, onClose, onAdded }: any) {
     ifscCode: "",
     bankName: "",
     password: "",
+    driverPhotoUrl: "",
+    licenseFrontPhotoUrl: "",
+    licenseBackPhotoUrl: "",
   });
+  const [uploading, setUploading] = useState<{ [key: string]: boolean }>({});
 
   if (!open) return null;
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading((prev) => ({ ...prev, [fieldName]: true }));
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.error || "Failed to upload image");
+        return;
+      }
+
+      const data = await res.json();
+      setForm((prev) => ({ ...prev, [fieldName]: data.imageUrl }));
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while uploading");
+    } finally {
+      setUploading((prev) => ({ ...prev, [fieldName]: false }));
+    }
+  };
 
   const handleSubmit = async () => {
     await fetch("/api/drivers", {
@@ -262,6 +296,157 @@ export function AddDriverModal({ open, onClose, onAdded }: any) {
               className="w-full border px-3 py-2 rounded"
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
+          </div>
+
+          <div className="col-span-2 border-t pt-4 mt-2">
+            <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wider">
+              Verification Documents & Photos
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Selfie Photo */}
+              <div className="border rounded p-3 bg-gray-50 flex flex-col gap-2">
+                <span className="text-xs font-semibold text-gray-600 block">
+                  Driver Photo (Selfie)
+                </span>
+                {form.driverPhotoUrl ? (
+                  <div className="relative aspect-[4/3] w-full rounded overflow-hidden border bg-white group">
+                    <img
+                      src={form.driverPhotoUrl}
+                      alt="Driver Photo"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, driverPhotoUrl: "" })}
+                      className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full text-xs shadow-md transition-colors"
+                      title="Remove Image"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="aspect-[4/3] w-full rounded border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-white text-gray-400 text-xs p-2 text-center hover:border-indigo-500 cursor-pointer relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, "driverPhotoUrl")}
+                      disabled={uploading["driverPhotoUrl"]}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                    {uploading["driverPhotoUrl"] ? (
+                      <span className="text-indigo-600 font-medium animate-pulse">Uploading...</span>
+                    ) : (
+                      <>
+                        <span className="font-semibold text-indigo-600">Click to Upload</span>
+                        <span className="text-[10px] text-gray-400 mt-0.5">PNG, JPG, WEBP up to 5MB</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                <input
+                  placeholder="Or paste image URL"
+                  value={form.driverPhotoUrl || ""}
+                  className="w-full border px-2 py-1 text-xs rounded bg-white mt-1"
+                  onChange={(e) => setForm({ ...form, driverPhotoUrl: e.target.value })}
+                />
+              </div>
+
+              {/* License Front Photo */}
+              <div className="border rounded p-3 bg-gray-50 flex flex-col gap-2">
+                <span className="text-xs font-semibold text-gray-600 block">
+                  License Front Photo
+                </span>
+                {form.licenseFrontPhotoUrl ? (
+                  <div className="relative aspect-[4/3] w-full rounded overflow-hidden border bg-white group">
+                    <img
+                      src={form.licenseFrontPhotoUrl}
+                      alt="License Front"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, licenseFrontPhotoUrl: "" })}
+                      className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full text-xs shadow-md transition-colors"
+                      title="Remove Image"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="aspect-[4/3] w-full rounded border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-white text-gray-400 text-xs p-2 text-center hover:border-indigo-500 cursor-pointer relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, "licenseFrontPhotoUrl")}
+                      disabled={uploading["licenseFrontPhotoUrl"]}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                    {uploading["licenseFrontPhotoUrl"] ? (
+                      <span className="text-indigo-600 font-medium animate-pulse">Uploading...</span>
+                    ) : (
+                      <>
+                        <span className="font-semibold text-indigo-600">Click to Upload</span>
+                        <span className="text-[10px] text-gray-400 mt-0.5">PNG, JPG, WEBP up to 5MB</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                <input
+                  placeholder="Or paste image URL"
+                  value={form.licenseFrontPhotoUrl || ""}
+                  className="w-full border px-2 py-1 text-xs rounded bg-white mt-1"
+                  onChange={(e) => setForm({ ...form, licenseFrontPhotoUrl: e.target.value })}
+                />
+              </div>
+
+              {/* License Back Photo */}
+              <div className="border rounded p-3 bg-gray-50 flex flex-col gap-2">
+                <span className="text-xs font-semibold text-gray-600 block">
+                  License Back Photo
+                </span>
+                {form.licenseBackPhotoUrl ? (
+                  <div className="relative aspect-[4/3] w-full rounded overflow-hidden border bg-white group">
+                    <img
+                      src={form.licenseBackPhotoUrl}
+                      alt="License Back"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, licenseBackPhotoUrl: "" })}
+                      className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full text-xs shadow-md transition-colors"
+                      title="Remove Image"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="aspect-[4/3] w-full rounded border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-white text-gray-400 text-xs p-2 text-center hover:border-indigo-500 cursor-pointer relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, "licenseBackPhotoUrl")}
+                      disabled={uploading["licenseBackPhotoUrl"]}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                    {uploading["licenseBackPhotoUrl"] ? (
+                      <span className="text-indigo-600 font-medium animate-pulse">Uploading...</span>
+                    ) : (
+                      <>
+                        <span className="font-semibold text-indigo-600">Click to Upload</span>
+                        <span className="text-[10px] text-gray-400 mt-0.5">PNG, JPG, WEBP up to 5MB</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                <input
+                  placeholder="Or paste image URL"
+                  value={form.licenseBackPhotoUrl || ""}
+                  className="w-full border px-2 py-1 text-xs rounded bg-white mt-1"
+                  onChange={(e) => setForm({ ...form, licenseBackPhotoUrl: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

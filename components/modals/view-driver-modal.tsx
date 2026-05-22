@@ -11,7 +11,7 @@ export function ViewDriverModal({ open, onClose, driver, onUpdated }: any) {
     if (!confirm("Reject this driver application?")) return;
     await fetch(`/api/drivers/${id}/reject`, { method: "PATCH" });
     onUpdated();
-    onClose?.();  
+    onClose?.();
   };
 
   return (
@@ -110,19 +110,115 @@ export function ViewDriverModal({ open, onClose, driver, onUpdated }: any) {
             <label className="font-semibold text-gray-600">Status:</label>
             <p className="mt-1">
               <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  driver.status === "Active"
-                    ? "bg-green-100 text-green-700"
-                    : driver.status === "Pending Approval"
+                className={`px-3 py-1 rounded-full text-xs font-medium ${driver.status === "Active"
+                  ? "bg-green-100 text-green-700"
+                  : driver.status === "Pending Approval"
                     ? "bg-yellow-100 text-yellow-700"
                     : driver.status === "Banned"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
               >
                 {driver.status}
               </span>
             </p>
+          </div>
+        </div>
+
+        <div className="mt-6 border-t pt-6">
+          <h3 className="font-bold text-gray-800 mb-4 text-sm tracking-wide uppercase">
+            Documents & Photos
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Selfie / Driver Photo */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold text-gray-500">
+                Driver Photo (Selfie)
+              </span>
+              {driver.driverPhotoUrl ? (
+                <a
+                  href={driver.driverPhotoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+                >
+                  <img
+                    src={driver.driverPhotoUrl}
+                    alt="Driver Photo"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                    <span className="text-white text-xs font-medium bg-black/60 px-2 py-1 rounded">
+                      View Full Size
+                    </span>
+                  </div>
+                </a>
+              ) : (
+                <div className="aspect-[4/3] rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 bg-gray-50 text-xs">
+                  <span>No Selfie Uploaded</span>
+                </div>
+              )}
+            </div>
+
+            {/* License Front Photo */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold text-gray-500">
+                License Front
+              </span>
+              {driver.licenseFrontPhotoUrl ? (
+                <a
+                  href={driver.licenseFrontPhotoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+                >
+                  <img
+                    src={driver.licenseFrontPhotoUrl}
+                    alt="License Front"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                    <span className="text-white text-xs font-medium bg-black/60 px-2 py-1 rounded">
+                      View Full Size
+                    </span>
+                  </div>
+                </a>
+              ) : (
+                <div className="aspect-[4/3] rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 bg-gray-50 text-xs">
+                  <span>No Front Photo</span>
+                </div>
+              )}
+            </div>
+
+            {/* License Back Photo */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold text-gray-500">
+                License Back
+              </span>
+              {driver.licenseBackPhotoUrl ? (
+                <a
+                  href={driver.licenseBackPhotoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+                >
+                  <img
+                    src={driver.licenseBackPhotoUrl}
+                    alt="License Back"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                    <span className="text-white text-xs font-medium bg-black/60 px-2 py-1 rounded">
+                      View Full Size
+                    </span>
+                  </div>
+                </a>
+              ) : (
+                <div className="aspect-[4/3] rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 bg-gray-50 text-xs">
+                  <span>No Back Photo</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
