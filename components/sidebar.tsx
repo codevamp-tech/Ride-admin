@@ -20,6 +20,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     { label: "Passengers", href: "/passengers" },
     { label: "Configuration", href: "/configurations" },
     { label: "Ads", href: "/ads" },
+    { label: "Promo Codes", href: "/promo-codes" },
+    { label: "Promo Usages", href: "/promo-usages" },
   ];
 
     const filteredNavItems = navItems.filter((item) => {

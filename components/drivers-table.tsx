@@ -17,7 +17,10 @@ interface Driver {
   registrationNumber: string;
   vehicleType: string;
   licensePlate: string;
-  status: "Active" | "Inactive" | "Suspended";
+  status: "Active" | "Inactive" | "Suspended" | "Pending Approval" | "Banned" | "Rejected";
+  licenseFrontPhotoUrl?: string;
+  licenseBackPhotoUrl?: string;
+  driverPhotoUrl?: string;
 }
 
 export function DriversTable() {
@@ -61,6 +64,9 @@ export function DriversTable() {
           ifscCode: d.ifscCode,
           bankName: d.bankName,
           status: d.status || "Pending Approval",
+          licenseFrontPhotoUrl: d.licenseFrontPhotoUrl,
+          licenseBackPhotoUrl: d.licenseBackPhotoUrl,
+          driverPhotoUrl: d.driverPhotoUrl,
         }));
         setDrivers(formatted);
       });
@@ -211,35 +217,30 @@ export function DriversTable() {
                   <td className="px-4 py-3">{driver.licenseExpiry}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs whitespace-nowrap font-medium ${
-                        driver.status === "Active"
+                      className={`px-3 py-1 rounded-full text-xs whitespace-nowrap font-medium ${driver.status === "Active"
                           ? "bg-green-100 text-green-700"
                           : driver.status === "Pending Approval"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : driver.status === "Banned"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
+                            ? "bg-yellow-100 text-yellow-700"
+                            : driver.status === "Banned"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-700"
+                        }`}
                     >
                       {driver.status}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      {driver.status === "Pending Approval" ? (
-                        <>
-                          <button
-                            onClick={() => {
-                              setSelectedDriver(driver);
-                              setOpenView(true);
-                            }}
-                            className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
-                          >
-                            View Profile
-                          </button>
-                         
-                        </>
-                      ) : (
+                      <button
+                        onClick={() => {
+                          setSelectedDriver(driver);
+                          setOpenView(true);
+                        }}
+                        className="px-3 py-1 bg-indigo-600 text-white rounded text-xs hover:bg-indigo-700"
+                      >
+                        View
+                      </button>
+                      {driver.status !== "Pending Approval" && (
                         <>
                           <button
                             onClick={() => {
@@ -258,11 +259,10 @@ export function DriversTable() {
                           </button>
                           <button
                             onClick={() => toggleBan(driver._id)}
-                            className={`px-3 py-1 rounded text-xs ${
-                              driver.status === "Banned"
+                            className={`px-3 py-1 rounded text-xs ${driver.status === "Banned"
                                 ? "bg-green-600 text-white hover:bg-green-700"
                                 : "bg-orange-600 text-white hover:bg-orange-700"
-                            }`}
+                              }`}
                           >
                             {driver.status === "Banned" ? "Unban" : "Ban"}
                           </button>

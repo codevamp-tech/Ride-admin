@@ -5,72 +5,24 @@ import { Card } from "@/components/ui/card"
 
 interface Payment {
   _id: string
-  bookingId: string
-  passengerName: string
+  rideId: {
+    _id: string
+  }
+  passengerId: {
+    fullName: string
+  }
   amount: number
-  paymentMode: string
-  rideType: "Private" | "Shared"
+  paymentId: string
+  rideType: string
+  status: string
   date: string
 }
 
-const mockPayments: Payment[] = [
-  {
-    _id: "P001",
-    bookingId: "B001",
-    passengerName: "John Doe",
-    amount: 250,
-    paymentMode: "UPI",
-    rideType: "Private",
-    date: "2025-11-12",
-  },
-  {
-    _id: "P002",
-    bookingId: "B002",
-    passengerName: "Jane Smith",
-    amount: 120,
-    paymentMode: "Card",
-    rideType: "Shared",
-    date: "2025-11-12",
-  },
-  {
-    _id: "P003",
-    bookingId: "B003",
-    passengerName: "Mike Johnson",
-    amount: 180,
-    paymentMode: "Wallet",
-    rideType: "Private",
-    date: "2025-11-11",
-  },
-  {
-    _id: "P004",
-    bookingId: "B004",
-    passengerName: "Sarah Williams",
-    amount: 90,
-    paymentMode: "UPI",
-    rideType: "Shared",
-    date: "2025-11-11",
-  },
-  {
-    _id: "P005",
-    bookingId: "B005",
-    passengerName: "David Brown",
-    amount: 220,
-    paymentMode: "Card",
-    rideType: "Private",
-    date: "2025-11-10",
-  },
-  {
-    _id: "P006",
-    bookingId: "B006",
-    passengerName: "Emma Davis",
-    amount: 110,
-    paymentMode: "Wallet",
-    rideType: "Shared",
-    date: "2025-11-10",
-  },
-]
+import { useEffect } from "react"
 
 export function PaymentsTable() {
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [rideTypeFilter, setRideTypeFilter] = useState<"All" | "Private" | "Shared">("All")
   const [dateRangeStart, setDateRangeStart] = useState("")
@@ -78,13 +30,32 @@ export function PaymentsTable() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  const filteredPayments = useMemo(() => {
-    return mockPayments.filter((payment) => {
-      const matchesSearch =
-        payment.passengerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.bookingId.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    async function fetchPayments() {
+      try {
+        const res = await fetch("/api/payments")
+        const data = await res.json()
+        setPayments(data)
+      } catch (err) {
+        console.error("Failed to fetch payments:", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchPayments()
+  }, [])
 
-      const matchesRideType = rideTypeFilter === "All" || payment.rideType === rideTypeFilter
+  const filteredPayments = useMemo(() => {
+    return payments.filter((payment) => {
+      const passengerName = payment.passengerId?.fullName || "N/A"
+      const bookingId = payment.rideId?._id || "N/A"
+      const rideType = payment.rideType ? payment.rideType.charAt(0).toUpperCase() + payment.rideType.slice(1) : "N/A" // Map lowercase to TitleCase
+
+      const matchesSearch =
+        passengerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        bookingId.toString().toLowerCase().includes(searchTerm.toLowerCase())
+
+      const matchesRideType = rideTypeFilter === "All" || rideType === rideTypeFilter
 
       const paymentDate = new Date(payment.date)
       const matchesDateRange =
@@ -93,7 +64,7 @@ export function PaymentsTable() {
 
       return matchesSearch && matchesRideType && matchesDateRange
     })
-  }, [searchTerm, rideTypeFilter, dateRangeStart, dateRangeEnd])
+  }, [payments, searchTerm, rideTypeFilter, dateRangeStart, dateRangeEnd])
 
   const paginatedPayments = filteredPayments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
@@ -174,17 +145,35 @@ export function PaymentsTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {paginatedPayments.map((payment) => (
-                <tr key={payment._id} className="hover:bg-surface">
-                  <td className="px-4 py-3 text-text">{payment._id}</td>
-                  <td className="px-4 py-3 text-text">{payment.bookingId}</td>
-                  <td className="px-4 py-3 text-text">{payment.passengerName}</td>
-                  <td className="px-4 py-3 text-text font-medium">${payment.amount}</td>
-                  <td className="px-4 py-3 text-text">{payment.paymentMode}</td>
-                  <td className="px-4 py-3 text-text">{payment.rideType}</td>
-                  <td className="px-4 py-3 text-text">{payment.date}</td>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-text-light">
+                    Loading payments...
+                  </td>
                 </tr>
-              ))}
+              ) : paginatedPayments.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-text-light">
+                    No payments found.
+                  </td>
+                </tr>
+              ) : (
+                paginatedPayments.map((payment) => (
+                  <tr key={payment._id} className="hover:bg-surface">
+                    <td className="px-4 py-3 text-text truncate max-w-[150px]" title={payment._id}>
+                      {payment._id}
+                    </td>
+                    <td className="px-4 py-3 text-text truncate max-w-[150px]" title={payment.rideId?._id}>
+                      {payment.rideId?._id || "N/A"}
+                    </td>
+                    <td className="px-4 py-3 text-text">{payment.passengerId?.fullName || "Unknown"}</td>
+                    <td className="px-4 py-3 text-text font-medium">₹{payment.amount}</td>
+                    <td className="px-4 py-3 text-text">{payment.paymentId}</td>
+                    <td className="px-4 py-3 text-text capitalize">{payment.rideType}</td>
+                    <td className="px-4 py-3 text-text">{payment.date ? new Date(payment.date).toLocaleDateString() : "N/A"}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
