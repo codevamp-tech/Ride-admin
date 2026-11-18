@@ -22,6 +22,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     { label: "Ads", href: "/ads" },
     { label: "Promo Codes", href: "/promo-codes" },
     { label: "Promo Usages", href: "/promo-usages" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
   ];
 
     const filteredNavItems = navItems.filter((item) => {
