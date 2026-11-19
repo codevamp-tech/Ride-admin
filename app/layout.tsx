@@ -8,9 +8,8 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Qubi Ride Admin",
-  description: "Admin dashboard for Qubi Ride ride-sharing service",
-    generator: 'v0.app'
+  title: "Qubi Ride — Fast, Safe & Affordable Rides",
+  description: "Official portal and support center for Qubi Ride and Qubi Captain (operated by Oscode Software).",
 }
 
 export default function RootLayout({
